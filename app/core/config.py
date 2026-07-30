@@ -26,10 +26,12 @@ class Settings(BaseSettings):
     ollama_base_url: str = "http://localhost:11434"
 
     # Retrieval 
-    top_k: int = 3
+    top_k: int = 10
+    rerank_top_k: int = 3
 
     # Toggle 
     use_gemini: bool = False
+    
 
     model_config = SettingsConfigDict(
         env_file=".env",
