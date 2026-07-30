@@ -1,18 +1,28 @@
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_qdrant import QdrantVectorStore
+from langchain_qdrant import (
+    FastEmbedSparse,
+    QdrantVectorStore,
+    RetrievalMode,
+)
+
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import (
+    Distance,
+    SparseVectorParams,
+    VectorParams,
+)
 
 from app.core.config import get_settings
 
 
 class QdrantStore:
-    """
-    Wrapper around Qdrant vector database.
-    """
 
-    def __init__(self, embeddings: Embeddings):
+    def __init__(
+        self,
+        dense_embeddings: Embeddings,
+        sparse_embeddings: FastEmbedSparse,
+    ):
         settings = get_settings()
 
         self.collection_name = settings.qdrant_collection
@@ -22,50 +32,58 @@ class QdrantStore:
             api_key=settings.qdrant_api_key,
         )
 
-        self.embeddings = embeddings
+        self.dense_embeddings = dense_embeddings
+        self.sparse_embeddings = sparse_embeddings
 
         self._create_collection()
 
         self.vectorstore = QdrantVectorStore(
             client=self.client,
             collection_name=self.collection_name,
-            embedding=self.embeddings,
+            embedding=self.dense_embeddings,
+            sparse_embedding=self.sparse_embeddings,
+            retrieval_mode=RetrievalMode.HYBRID,
         )
 
-    def _create_collection(self) -> None:
-        """
-        Create the collection if it doesn't already exist.
-        """
+    def _create_collection(self):
 
         collections = self.client.get_collections().collections
-        collection_names = [collection.name for collection in collections]
 
-        if self.collection_name not in collection_names:
-            embedding_dimension = len(self.embeddings.embed_query("dimension check"))
+        names = [c.name for c in collections]
+
+        if self.collection_name not in names:
+
+            dimension = len(
+                self.dense_embeddings.embed_query(
+                    "dimension check"
+                )
+            )
 
             self.client.create_collection(
                 collection_name=self.collection_name,
+
                 vectors_config=VectorParams(
-                    size=embedding_dimension,
+                    size=dimension,
                     distance=Distance.COSINE,
                 ),
+
+                sparse_vectors_config={
+                    "langchain-sparse": SparseVectorParams()
+                },
             )
 
-    def add_documents(self, documents: list[Document]) -> None:
-        """
-        Store documents in Qdrant.
-        """
+    def add_documents(
+        self,
+        documents: list[Document],
+    ):
 
         self.vectorstore.add_documents(documents)
 
     def similarity_search(
         self,
         query: str,
-        k: int = 3,
+        k: int = 10,
     ) -> list[Document]:
-        """
-        Retrieve similar documents.
-        """
 
         return self.vectorstore.similarity_search(
             query=query,

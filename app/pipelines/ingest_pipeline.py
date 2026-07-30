@@ -5,37 +5,26 @@ from app.vectorstores.qdrant_store import QdrantStore
 
 
 class IngestPipeline:
-    """
-    End-to-end document ingestion pipeline.
-    """
 
     def __init__(self, documents_path: str):
+
         self.loader = PDFLoader(documents_path)
         self.chunker = RecursiveChunker()
 
-        embeddings = EmbeddingFactory.get_embeddings()
+        dense = EmbeddingFactory.get_dense_embeddings()
+        sparse = EmbeddingFactory.get_sparse_embeddings()
 
-        self.vector_store = QdrantStore(embeddings)
+        self.vector_store = QdrantStore(
+            dense_embeddings=dense,
+            sparse_embeddings=sparse,
+        )
 
-    def run(self) -> None:
-        """
-        Load → Chunk → Store documents.
-        """
-
-        print("Loading documents...")
+    def run(self):
 
         documents = self.loader.load()
 
-        print(f"Loaded {len(documents)} pages")
-
-        print("Chunking documents...")
-
         chunks = self.chunker.split(documents)
-
-        print(f"Created {len(chunks)} chunks")
-
-        print("Uploading to Qdrant...")
 
         self.vector_store.add_documents(chunks)
 
-        print("Ingestion completed successfully.")
+        print("Hybrid ingestion completed.")

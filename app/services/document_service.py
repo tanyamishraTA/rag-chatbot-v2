@@ -1,13 +1,20 @@
+from app.chunking.recursive_chunker import RecursiveChunker
 from app.loaders.pdf_loader import PDFLoader
-from app.chunking.recursive_chunker import RecursiveChunkingService
+from langchain_core.documents import Document
 
 
 class DocumentService:
+    """
+    Responsible for loading and chunking documents.
+    """
 
-    def __init__(self):
-        self.loader = PDFLoader("documents")
-        self.chunker = RecursiveChunkingService()
+    def __init__(self, documents_path: str = "documents"):
+        self.loader = PDFLoader(documents_path)
+        self.chunker = RecursiveChunker()
 
-    def get_chunks(self):
-        documents = self.loader.load()
-        return self.chunker.chunk_documents(documents)
+    def get_documents(self) -> list[Document]:
+        return self.loader.load()
+
+    def get_chunks(self) -> list[Document]:
+        documents = self.get_documents()
+        return self.chunker.split(documents)
