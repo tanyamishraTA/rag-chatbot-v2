@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 
 class ChatRequest(BaseModel):
+    session_id: str
     question: str
     model: Literal["gemini", "ollama"] = "ollama"
 

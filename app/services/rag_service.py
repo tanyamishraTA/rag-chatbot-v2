@@ -6,8 +6,14 @@ class RAGService:
     def __init__(self):
         self.pipeline = RAGPipeline()
 
-    def chat(self,question: str,model: str,):
+    def chat(
+        self,
+        session_id: str,
+        question: str,
+        model: str,
+    ):
         return self.pipeline.run(
+            session_id=session_id,
             question=question,
             model=model,
-            )
+        )

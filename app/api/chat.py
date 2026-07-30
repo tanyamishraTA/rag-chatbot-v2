@@ -12,6 +12,7 @@ service = RAGService()
 def chat(request: ChatRequest):
 
     return service.chat(
-        question=request.question,
-        model=request.model,
-    )
+    session_id=request.session_id,
+    question=request.question,
+    model=request.model,
+)
