@@ -5,6 +5,7 @@ from app.retrievers.vector_retriever import VectorRetriever
 from app.services.query_rewriter import QueryRewriter
 
 
+
 class RAGPipeline:
     """
     End-to-end Retrieval Augmented Generation pipeline.
@@ -24,15 +25,15 @@ class RAGPipeline:
     ) -> dict:
 
         # Load conversation history
-        history = self.memory.get_history(session_id)
+        history = self.memory.get_recent_history(session_id)
 
         history_text = "\n".join(
             f"{message.type}: {message.content}"
-            for message in history.messages
+            for message in history
         )
 
         # Rewrite follow-up question only if there is previous conversation
-        if history.messages:
+        if history:
             standalone_question = self.query_rewriter.rewrite(
                 history=history_text,
                 question=question,
@@ -54,7 +55,7 @@ class RAGPipeline:
             {
                 "history": history_text,
                 "context": context,
-                "question": question,
+                "question": standalone_question,
             }
         )
 

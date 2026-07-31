@@ -31,6 +31,9 @@ class Settings(BaseSettings):
 
     # Toggle 
     use_gemini: bool = False
+
+    # history trimming
+    history_window: int = 6
     
 
     model_config = SettingsConfigDict(
