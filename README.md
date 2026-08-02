@@ -11,7 +11,7 @@ The React frontend for this project is maintained in a separate repository.
 
 **Frontend Repository:**
 
-https://github.com/tanyamishraTA/chatbot-frontend
+https://github.com/tanyamishraTA/rag-chatbot-frontend
 
 ---
 
