@@ -366,3 +366,8 @@ POST /chat
 # License
 
 This project is intended for educational and learning purposes.
+
+---
+
+# Author 
+Tanya Mishra
