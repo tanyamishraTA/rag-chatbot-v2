@@ -5,6 +5,15 @@ An AI-powered **Retrieval-Augmented Generation (RAG)** chatbot that enables user
 The chatbot leverages **Hybrid Search (Dense + Sparse Retrieval)**, **Cross-Encoder Re-ranking**, and **Conversational Memory** to deliver highly relevant and context-aware answers.
 
 ---
+## Frontend Repository
+
+The React frontend for this project is maintained in a separate repository.
+
+**Frontend Repository:**
+
+https://github.com/tanyamishraTA/chatbot-frontend
+
+---
 
 ## Features
 
