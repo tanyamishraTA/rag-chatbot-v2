@@ -3,12 +3,12 @@ from app.memory.memory_service import MemoryService
 from app.prompts.chat_prompt import chat_prompt
 from app.retrievers.vector_retriever import VectorRetriever
 from app.services.query_rewriter import QueryRewriter
-
+from app.services.multi_query_generator import MultiQueryGenerator
 
 
 class RAGPipeline:
     """
-    End-to-end Retrieval Augmented Generation pipeline.
+    End-to-end Retrieval Augmented Generation pipeline with Multi-Query Retrieval (MQR).
     """
 
     def __init__(self):
@@ -16,6 +16,7 @@ class RAGPipeline:
         self.llm_service = LLMService()
         self.memory = MemoryService()
         self.query_rewriter = QueryRewriter()
+        self.multi_query_generator = MultiQueryGenerator()
 
     def run(
         self,
@@ -42,8 +43,17 @@ class RAGPipeline:
         else:
             standalone_question = question
 
-        # Retrieve documents using rewritten question
-        documents = self.retriever.retrieve(standalone_question)
+        # Generate multi-query variations
+        queries = self.multi_query_generator.generate_queries(
+            question=standalone_question,
+            model=model,
+        )
+
+        # Retrieve documents across all queries and rerank against standalone_question
+        documents = self.retriever.retrieve_multi(
+            queries=queries,
+            original_query=standalone_question,
+        )
 
         context = "\n\n".join(
             doc.page_content

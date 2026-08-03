@@ -36,3 +36,34 @@ class VectorRetriever:
         )
 
         return reranked_documents
+
+    def retrieve_multi(self, queries: list[str], original_query: str):
+        """
+        Retrieves candidate documents for multiple query variations,
+        deduplicates them, and reranks the candidate pool against original_query.
+        """
+        seen = set()
+        deduped_documents = []
+
+        for q in queries:
+            docs = self.vector_store.similarity_search(
+                query=q,
+                k=self.top_k,
+            )
+            for doc in docs:
+                doc_key = (
+                    doc.page_content,
+                    doc.metadata.get("source"),
+                    doc.metadata.get("page"),
+                )
+                if doc_key not in seen:
+                    seen.add(doc_key)
+                    deduped_documents.append(doc)
+
+        reranked_documents = self.reranker.rerank(
+            query=original_query,
+            documents=deduped_documents,
+            top_k=self.rerank_top_k,
+        )
+
+        return reranked_documents

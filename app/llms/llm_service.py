@@ -6,7 +6,7 @@ class LLMService:
     def generate(
         self,
         prompt,
-        model: str,
+        model: str | None = None,
     ) -> str:
 
         llm = LLMFactory.get_llm(model)

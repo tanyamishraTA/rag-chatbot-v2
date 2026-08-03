@@ -8,9 +8,12 @@ from app.core.config import get_settings
 class LLMFactory:
 
     @staticmethod
-    def get_llm(model: str) -> BaseChatModel:
+    def get_llm(model: str | None = None) -> BaseChatModel:
 
         settings = get_settings()
+
+        if not model:
+            model = "gemini" if settings.use_gemini else "ollama"
 
         if model == "gemini":
             return ChatGoogleGenerativeAI(
